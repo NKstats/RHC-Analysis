@@ -31,7 +31,12 @@ figures/survplot.pdf: \
 data/weighted_data.csv \
 SurvivalAnalysis.R
 	Rscript SurvivalAnalysis.R
-	
+
+figures/estimates.pdf: \
+data/weighted_data.csv \
+Effect_Estimations.R
+	Rscript Effect_Estimations.R
+
 Summary.pdf: \
 figures/balplot.pdf \
 figures/survplot.pdf \
