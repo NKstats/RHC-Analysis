@@ -30,7 +30,7 @@ SHAP_analysis.ipynb
 	python3 -m jupyter nbconvert --to notebook \
 	--execute SHAP_analysis.ipynb --output figures/shap.pdf
 
-figures/survplot.pdf: \
+figures/survplot.pdf figures/HRestimates.pdf: \
 data/weighted_data.csv \
 SurvivalAnalysis.R
 	Rscript SurvivalAnalysis.R
@@ -52,6 +52,7 @@ Report.pdf: \
 figures/descriptive.pdf \
 figures/balplot.pdf \
 figures/survplot.pdf \
+figures/HRestimates.pdf \
 figures/roc_curve.pdf figures/shap1.pdf figures/shap2.pdf \
 Report.Rmd
 	Rscript -e \
