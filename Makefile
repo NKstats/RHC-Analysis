@@ -16,6 +16,9 @@ clean:
 data/RHCsubset.csv: .created-dirs preprocess.R
 	Rscript preprocess.R
 
+figures/descriptive.pdf: data/RHCsubset.csv descriptive.R
+	Rscript descriptive.R
+
 figures/balplot.pdf data/weighted_data.csv: \
 data/RHCsubset.csv \
 IPW.R
@@ -46,6 +49,7 @@ Summary.Rmd
 	"rmarkdown::render('Summary.Rmd', output_format='pdf_document', quiet = T)"
 
 Report.pdf: \
+figures/descriptive.pdf \
 figures/balplot.pdf \
 figures/survplot.pdf \
 figures/roc_curve.pdf figures/shap1.pdf figures/shap2.pdf \
