@@ -55,7 +55,7 @@ label <- data.frame(
   old = c(
     "age", "sex", "race_black", "race_other", "race_white",
     "income_> $50k", "income_$11-$25k", "income_$25-$50k", "income_Under $11k",
-    "edu", "temp1", "wtkilo1", "scoma1", "das2d3pc", "ca_Yes", "cardiohx",
+    "edu", "temp1", "wtkilo1", "scoma1", "das2d3pc", "ca", "cardiohx",
     "dementhx", "malighx", "immunhx", "liverhx", "psychhx", "chfhx", "renalhx"),
   new = c(
     "Age", "Female", "Black", "Other Race", "White", "Income > $50k",
