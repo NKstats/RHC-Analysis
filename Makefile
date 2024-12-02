@@ -19,7 +19,7 @@ data/RHCsubset.csv: .created-dirs preprocess.R
 figures/descriptive.pdf: data/RHCsubset.csv descriptive.R
 	Rscript descriptive.R
 
-figures/balplot.pdf data/weighted_data.csv: \
+figures/psplot.pdf figures/balplot.pdf data/weighted_data.csv: \
 data/RHCsubset.csv \
 IPW.R
 	Rscript IPW.R
@@ -41,6 +41,7 @@ Effect_Estimations.R
 	Rscript Effect_Estimations.R
 
 Summary.pdf: \
+figures/psplot.pdf \
 figures/balplot.pdf \
 figures/survplot.pdf \
 figures/roc_curve.pdf figures/shap1.pdf figures/shap2.pdf \
@@ -50,7 +51,9 @@ Summary.Rmd
 
 Report.pdf: \
 figures/descriptive.pdf \
+figures/psplot.pdf \
 figures/balplot.pdf \
+figures/estimates.pdf \
 figures/survplot.pdf \
 figures/HRestimates.pdf \
 figures/roc_curve.pdf figures/shap1.pdf figures/shap2.pdf \
