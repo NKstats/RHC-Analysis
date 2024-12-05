@@ -3,9 +3,9 @@
 
 ![](./Summary.png)
 
-This repo contains tools and scripts for evaluating the effects of Right 
+This repo contains the scripts for evaluating the effects of Right 
 Heart Catheterization (RHC) on survival outcomes in critically ill patients. 
-The project is built using R, Python, Docker, and a Makefile to ensure smooth data 
+The project is built using R, Python, LaTeX, Docker, and a Makefile to ensure smooth data 
 preprocessing and analysis. The instructions below will guide you through 
 setting up the Docker container, installing necessary packages, and running 
 the Makefile to reproduce the results. If you choose not to use the containerized 
@@ -15,8 +15,7 @@ The `Dockerfile` outlines the environment configuration, including software
 installations, libraries, and other prerequisites, ensuring the code runs as 
 intended. This can serve as a guide for setting up a compatible local environment.
 
-⚠️ This project was developed and tested on Apple **M3 Pro**, ensuring 
-compatibility and optimization for macOS systems. It should work on other 
+⚠️ This project was developed and tested on Apple **M3 Pro*. It should work on other 
 platforms with the necessary dependencies installed.
 
 ### Prerequisites
@@ -68,15 +67,20 @@ a seamless development experience for both R and Python users.
 
 This project generates two main PDF documents to summarize and report on the analysis performed:
 
-1. ``Summary.pdf``: A concise overview of the project with visualizations, highlighting key findings. To generate, run:  
-   
+1. ``Summary.pdf``: An overview of the project with visualizations. It serves 
+as a quick, high-level summary of the analysis. To generate, run the command 
+below in your terminal once you have logged into the Docker container. 
+Ensure the terminal is set to the correct directory. By default, the setup 
+ensures the terminal points to the directory holding the necessary files. 
+However, verify this to avoid errors.
+
 ```bash
    make Summary.pdf
 ```
 
 2. ``Report.pdf``: The final report containing all figures, analysis, and 
-explanations of methodologies used in the project. This document is suited for 
-readers or those seeking to replicate or expand upon the analysis.
+concise explanations of methodologies used in the analysis. This document is suited for 
+readers or those seeking to replicate the analysis.
 
 ```bash
    make Report.pdf
