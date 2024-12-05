@@ -24,6 +24,8 @@ RUN R -e "IRkernel::installspec(user = FALSE)"
 RUN R -e "install.packages(c('tinytex', 'Hmisc', 'tidyverse', 'haven', 'cobalt', 'marginaleffects', \
     'pacman', 'rmarkdown', 'patchwork', 'survey', 'tableone', 'survival', 'survminer', 'ggsurvfit'))"
 
+RUN R -e "tinytex::install_tinytex()"
+
 EXPOSE 8787 8888
 WORKDIR /home/rstudio
 
