@@ -1,0 +1,186 @@
+---
+output: 
+  pdf_document:
+    latex_engine: xelatex
+fontsize: 10pt
+geometry: margin=1in
+date: "2024-12-05"
+bibliography: references.bib
+header-includes:
+  - \usepackage{setspace, titlesec, placeins, lastpage, geometry, amssymb, amsmath}
+  - \usepackage{xcolor, fancyhdr, hyperref}
+  - \pagestyle{fancy}
+  - \fancyhead{}
+  - \fancyhf{}
+  - \renewcommand{\headrulewidth}{0pt}
+  - \onehalfspacing
+  - \setlength{\parindent}{0em}
+  - \setlength{\parskip}{0.8em}
+  - \cfoot{Page \thepage \hspace{1pt}/\pageref{LastPage}}
+  - \lhead{}
+  - \rhead{}
+  - \newgeometry{top=1in, bottom=1in}
+  - \geometry{a4paper}
+  - \hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+  - \usepackage{enumitem}
+  - \usepackage{lmodern}
+  - \renewcommand{\rmdefault}{lmss}
+  - \usepackage{caption}
+  - \usepackage[sfdefault]{carlito}
+---
+
+```{r setup, include=FALSE}
+if (!tinytex::is_tinytex()) {
+  tinytex::install_tinytex()
+}
+```
+
+\begin{center}
+
+\textbf{\large Evaluating RHC Treatment Effects \& Predicting Survival Outcomes in Critical Care Using Inverse Probability Weighting \& SHAP Analysis}
+
+\vspace{1em}
+
+\begin{table}[h]
+\setlength{\tabcolsep}{15pt}
+\centering
+\begin{tabular}{c}
+Solomon Eshun
+\end{tabular}
+\end{table}
+
+\end{center}
+
+
+\section{Introduction}
+
+\vspace{-1.3em}
+
+In critical care, accurately predicting patient survival and understanding the factors influencing outcomes are vital for guiding treatment decisions. Right Heart Catheterization (RHC) is a commonly used invasive procedure in critical care settings. However, its efficacy and impact on survival outcomes have been a subject of ongoing debate in the medical community [@grinstein2023standardization; @ranka2021right]. This necessitates need for precise tools to evaluate treatment effects and gain insights into contributing factors. 
+
+In this analysis, I aimed to explore the relationship between RHC and survival outcomes. In line with previous research, I hypothesized that RHC conributes to increased mortality in critical care settings. I created comparable groups of participants who received RHC and those who did not. This is in an attempt to replicate an experimental design as closely as possible to estimate the potential effects of RHC on survival outcomes, acknowledging that RHC treatement cannot be randomly assigned. In addition, I used machine learning models to predict survival outcones,  as well as using SHapley Additive exPlanations (SHAP) to understand the relationships between patient characteristics and survival outcomes. This analysis aims to bridge the gap between predictive modeling and causal analysis, shedding light on both the survival determinants in critically ill patients and the effect of RHC on these outcomes.
+
+\vspace{-2em}
+
+\section{Methods}
+
+\vspace{-1.3em}
+
+The data used for this analysis was based on the RHC data from R programming environment, comprising 5,735 critically ill patients receiving care in an intensive care unit. The dataset included demographic, clinical, and socioeconomic factors. The primary exposure of interest was whether a patient received an RHC procedure, and the outcome assessed was survival status (alive or dead).
+
+The primary analysis compared participants who received RHC procedure to controls who did not. To adjust for potential confounding, propensity score estimation and inverse probability weighting (IPW) were employed. Propensity scores were estimated for each participant using a logistic regression model, with RHC status as the outcome and the baseline characteristics listed in Table 1 as predictors. Stabilized IPWs were calculated and applied to create a pseudo-population in which covariates were balanced between the RHC and non-RHC groups. The effectiveness of the weighting was assessed using standardized mean differences (SMDs), with an absolute SMD greater than 0.1 indicating imbalance [@ho2007matching; @stuart2013prognostic]. Figure \ref{fig1} shows the distribution of the estimated propensity scores, the SMDs for the baseline covariates in the original and weighted samples. Initially, significant differences were observed in some covariates, with absolute SMDs exceeding 0.1. However, after weighting, the SMDs for all baseline covariates reduced to nearly zero. This indicates that, after adjusting for observed confounders, the baseline characteristics of participants with and without TSRD were similar, with all SMDs within the balance threshold (Right panel).
+
+\begin{figure}[!hbtp]
+    \centering
+    \includegraphics[width=0.49\linewidth]{figures/psplot.pdf}\includegraphics[width=0.49\linewidth]{figures/balplot.pdf}
+    \caption{(Left) Illustrates the distribution of estimated propensity scores, showing considerable overlap between RHC and non-RHC groups. (Right) Love plot of SMDs for covariates in the original and weighted samples. The dotted vertical lines represent an absolute SMD of 0.1, the threshold below which the covariate imbalance between RHC and control groups is considered negligible. This plot illustrates the extent of covariate balance before and after weighting.}\label{fig1}
+\end{figure}
+
+After confirming covariate balance, the average treatment effect was estimated to evaluate the impact of RHC on survival. The effects were estimated using the marginaleffects package in R [@marginal], which derives marginal effects directly from the weighted model predictions. Risk ratios (RRs) and absolute risk differences (ARDs) were estimated to quantify the relative likelihood of survival and the change in survival probability attributable to RHC, respectively. Odds ratios (ORs) were also calculated to provide an additional measure of association between RHC and survival outcomes.
+
+Time-to-event outcomes were further explored through survival analysis. Weighted Kaplan-Meier survival curves were generated to compare survival trajectories between the RHC and non-RHC groups. A weighted log-rank test was used to assess differences in survival curves. Additionally, a Cox proportional hazards model incorporating IPWs was fitted to estimate hazard ratios (HRs) for the effect of RHC on survival while adjusting for baseline characteristics.
+
+To predict survival outcomes, six machine learning models were trained: logistic regression, decision tree, random forest, gradient boosting, AdaBoost, and multi-layer perceptron. The dataset was divided into training (80%) and testing (20%) sets using the holdout method. Model performance was evaluated based on the area under the receiver operating characteristic curve (AUC) on the testing set. The top two performing models were selected for further SHapley Additive exPlanations (SHAP) analysis. SHAP values provided detailed insights into the contribution of each baseline covariate to the survival predictions.
+
+\vspace{-1.3em}
+
+\section{Results}
+
+\vspace{-2em}
+
+\subsection{Patients Demographics}
+
+\vspace{-1.3em}
+
+
+Out of the 5,735 patients, 2,184 (38.1\%) received RHC. Table 1 presents the baseline characteristics of the patients, categorized by RHC status. Considering the overall demographic, the mean age was approximately 61 years, with 44.3\% of the participants being female. The racial distribution included 16.0\% Black, 6.2\% other races, and 77.8\% White, with the majority (56.3\%) reporting an income below \$11K. Participants had an average of approximately 12 years of education, and comorbid conditions were prevalent, including malignancies (22.9\%), immunosuppression (26.9\%), and cardiovascular conditions (17.7\%). 
+
+When comparing the groups receiving RHC to those not receiving it, several notable differences emerge. The RHC group had a slightly lower mean age (60.75 vs. 61.76 years) and a smaller proportion of females (41.5\% vs. 46.1\%) compared to the control group. While the racial distribution was generally similar, the RHC group had a slightly higher proportion of individuals with an income above \$50K (8.9\% vs. 7.2\%) and a lower percentage reporting income below \$11K (52.4\% vs. 58.6\%). The income differences suggest that individuals with higher income levels may have better access to RHC, potentially reflecting healthcare disparities influenced by socioeconomic status. Clinically, those in the RHC group had a lower mean Glasgow Coma Score (18.97 vs. 22.25), slightly higher weight (72.36 kg vs. 65.04 kg), and a greater prevalence of cardiovascular conditions (20.4\% vs. 16.0\%). The prevalence of neurological (6.9\% vs. 11.6\%) and psychiatric (4.6\% vs. 8.1\%) conditions were higher in the control group, whereas the prevalence of cancer were slightly lower among those who received RHC (20.9\% vs. 25.3\%). These differences underline the necessity for IPW to control for confounding variables and ensure a balanced comparison between the groups for accurately assessing the impact of RHC on survival outcomes.
+
+\begin{figure}[!ht]
+    \centering
+    \caption*{Table 1: Baseline characteristics of patients with and without RHC.}
+    \vspace{-1.3em}
+    \includegraphics[width=0.9\linewidth]{figures/descriptive.pdf}
+\end{figure}
+\FloatBarrier
+
+\vspace{-2em}
+
+\subsection{Effect Estimations}
+
+\vspace{-1.3em}
+
+Table 2 summarizes the estimated marginal effects obtained after weighting. The results suggest that after accounting for confounding factors using IPW, patients who underwent RHC experienced worse survival outcomes compared to those who did not. Specifically, the adjusted risk ratio (RR) of 1.127 (95\% CI: 1.084, 1.171) indicates a 12.7\% higher relative risk of adverse outcomes (death) among those receiving RHC. Similarly, the adjusted risk difference (RD) of 0.078 (95\% CI: 0.053, 0.104) suggests an absolute increase of 7.8 percentage points in the risk of adverse outcomes for RHC patients. Additionally, the adjusted odds ratio (OR) of 1.415 (95\% CI: 1.261, 1.589) reflects a 41.5\% greater odds of adverse outcomes in the RHC group. These findings imply that RHC, while commonly used in clinical practice, may be associated with increased risks, potentially due to procedural complications, underlying patient conditions, or other unmeasured factors.
+
+\begin{figure}[!ht]
+    \centering
+    \caption*{Table 2: Estimated marginal effects of RHC on survival outcome.}
+    \vspace{-1.3em}
+    \includegraphics[width=0.65\linewidth]{figures/estimates.pdf}
+\end{figure}
+\FloatBarrier
+
+\vspace{-2em}
+
+
+\subsection{Survival Analysis}
+
+\vspace{-1.3em}
+
+The survival analysis provides important insights into the relationship between RHC and survival outcomes. The hazard ratio (HR) of 1.28 (95\% CI: 1.20–1.38) indicates that patients who underwent RHC had a 28% higher risk of death compared to those who did not receive RHC. This finding suggests that RHC is associated with worse survival outcomes overall. The Kaplan-Meier survival curves show that the RHC group consistently had lower survival probabilities than the no-RHC group during the earlier and middle parts of the follow-up period, which is consistent with the increased hazard indicated by the HR.
+
+However, the curves begin to converge around 39-40 months, and after this point, the survival probability for the RHC group becomes slightly higher than for the no-RHC group. This late-stage reversal may reflect a survivor effect, where patients in the RHC group who survive longer are more resilient or differ in some way from the broader population. This trend suggests that the effect of RHC on survival outcomes may change over time, with the initial increased risk diminishing for long-term survivors. These findings highlight the complexity of the association between RHC and survival and suggest the need for further research to explore the reasons behind these patterns.
+
+\begin{figure}[!hbtp]
+    \centering
+    \includegraphics[width=0.65\linewidth]{figures/survplot.pdf}
+    \caption{Adjusted Kaplan-Meier survival curves comparing survival probabilities between patients receiving RHC and those not receiving RHC.}\label{fig2} 
+\end{figure}
+\FloatBarrier
+
+\vspace{-2em}
+
+
+\subsection{Machine Learning Model Performance}
+
+\vspace{-1.3em}
+
+In the ROC analysis, the performance of six machine learning models in predicting survival outcomes was assessed. The Gradient Boosting model demonstrated the highest discriminative ability, with an Area Under the Curve (AUC) of 0.731, followed closely by Random Forest (AUC = 0.715), Logistic Regression (AUC = 0.713), and AdaBoost (AUC = 0.709). These models exhibited good predictive performance, as reflected by their AUCs, which are well above the 0.5 threshold of random guessing. The MLP Classifier achieved a moderately lower AUC of 0.696, while the Decision Tree model showed the weakest performance with an AUC of 0.576, only slightly better than random guessing (Figure \ref{fig3}).
+
+The ROC curves highlight the ability of each model to distinguish between survival outcomes, with a steeper curve indicating better performance. The Gradient Boosting model's superior AUC suggests it consistently achieved a favorable trade-off between sensitivity and specificity. Based on these results, Gradient Boosting and Random Forest were selected for further SHAP analysis, as they were the top two performing models according to the AUC metric. These findings underscore the effectiveness of ensemble-based methods in predicting survival outcomes.
+
+\begin{figure}[!hbtp]
+    \centering
+    \includegraphics[width=0.65\linewidth]{figures/roc_curve.pdf}
+    \caption{Receiver Operating Characteristic (ROC) curves comparing the performance of different machine learning models for predicting survival outcomes.}\label{fig3} 
+\end{figure}
+\FloatBarrier
+
+The SHAP analyses from both the Random Forest and Gradient Boosting models consistently highlight RHC (Right Heart Catheterization) as a significant predictor of adverse outcomes in critically ill patients. In the Random Forest model (Figure \ref{fig4}: left), RHC was a key feature contributing to predictions of increased risk of mortality. Its positive SHAP values suggest that undergoing RHC strongly correlates with worse survival outcomes, reinforcing earlier findings from survival analyses. Although other factors, such as age, cancer status, and weight, had higher overall impacts on model predictions, the consistent influence of RHC indicates its critical role in shaping the model's output. This suggests that the presence of RHC itself signals an elevated risk, likely reflecting the severity of illness or procedural risks. In the Gradient Boosting model (Figure \ref{fig4}: right), RHC similarly showed a notable contribution to predicting adverse outcomes. Its SHAP values were positive and among the top predictors, further emphasizing its association with higher mortality risk. Compared to other factors like age, Glasgow Coma Score, and income, RHC's importance remained substantial, suggesting that its impact on survival predictions is not merely a reflection of underlying patient characteristics but also a significant factor in its own right. This consistent contribution across models points to RHC as a marker for poorer outcomes, potentially due to procedural complications or the underlying conditions necessitating its use.
+
+These findings align with the survival and effect estimations, highlighting RHC as a predictor of worse outcomes. The SHAP analyses confirm that RHC significantly contributes to predicting adverse events, reinforcing the need for careful consideration of its risks and benefits in clinical decision-making.
+
+\begin{figure}[!hbtp]
+\centering
+\includegraphics[width=0.49\linewidth]{figures/shap1.pdf}
+\includegraphics[width=0.49\linewidth]{figures/shap2.pdf}
+  \caption{SHAP value analyses for the Random Forest (left) and Gradient Boosting (right) models, illustrating the contribution of individual features to the prediction of survival outcomes. RHC consistently shows a positive SHAP value, indicating its significant role in predicting adverse outcomes.}\label{fig4}
+\end{figure}
+\FloatBarrier
+
+\vspace{-2em}
+
+\section{Conclusion}
+
+\vspace{-1.3em}
+
+The results demonstrate that patients receiving RHC in critical care settings have an increased risk of mortality compared to those who do not. While RHC provides valuable diagnostic information, its clinical application requires careful patient selection. SHAP analysis revealed significant predictors of survival, highlighting the role of factors such as age, comorbidities, and socioeconomic status in influencing outcomes. The use of IPW effectively mitigated confounding, allowing for a more accurate estimation of treatment effects. The superior performance of machine learning models, particularly Gradient Boosting, underscores the utility of advanced predictive analytics in healthcare research.
+
+This study highlights the potential risks associated with RHC treatment in critical care and underscores the need for a personalized approach to patient management. 
+
+\vspace{-2em}
+
+\section{References}
+
+\vspace{-1.3em}
