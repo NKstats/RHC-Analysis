@@ -15,7 +15,7 @@ The `Dockerfile` outlines the environment configuration, including software
 installations, libraries, and other prerequisites, ensuring the code runs as 
 intended. This can serve as a guide for setting up a compatible local environment.
 
-⚠️ This project was developed and tested on Apple **M3 Pro*. It should work on other 
+⚠️ This project was developed and tested on Apple **M3 Pro**. It should work on other 
 platforms with the necessary dependencies installed.
 
 ### Prerequisites
